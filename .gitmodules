@@ -1,0 +1,4 @@
+[submodule "openresty-debian"]
+	path = openresty-debian
+	url = https://github.com/robertabcd/openresty-debian.git
+	branch = ptt
