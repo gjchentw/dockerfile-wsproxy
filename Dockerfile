@@ -4,7 +4,7 @@ ENV	OPENRESTY_VERSION=1.13.6.1 \
 	BUILD_DEPS="libreadline6-dev libncurses5-dev libpcre3-dev libssl1.0-dev zlib1g-dev make build-essential wget git" \
 	WSPROXY_ADDR="172.17.0.1:23"
 
-RUN	apt-get update && apt-get install -y ${BUILD_DEPS} libssl1.0.2 \
+RUN	apt-get update && apt-get dist-upgrade -y && apt-get install -y ${BUILD_DEPS} libssl1.0.2 \
 	&& \
 	mkdir -p /tmp/build && \
 	cd /tmp/build && \
