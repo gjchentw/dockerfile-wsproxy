@@ -50,11 +50,11 @@ function connect_mbbsd()
         return ngx.exit(555)
     end
 
-    local _, err = mbbsd:send(build_conn_data())
-    if err then
-        ngx.log(ngx.ERR, "failed to send conn data to mbbsd: ", err)
-        return ngx.exit(555)
-    end
+    -- local _, err = mbbsd:send(build_conn_data())
+    -- if err then
+    --    ngx.log(ngx.ERR, "failed to send conn data to mbbsd: ", err)
+    --    return ngx.exit(555)
+    -- end
 
     return mbbsd
 end
