@@ -3,6 +3,7 @@ local vstruct = require "vstruct"
 
 local logind_addr = os.getenv("WSPROXY_ADDR")
 local logind_port = os.getenv("WSPROXY_PORT")
+local with_conn_data = os.getenv("WSPROXY_CONN_DATA")
 
 local origin_whitelist = {
     ["http://www.ptt.cc"] = true,
@@ -50,11 +51,13 @@ function connect_mbbsd()
         return ngx.exit(555)
     end
 
-    -- local _, err = mbbsd:send(build_conn_data())
-    -- if err then
-    --    ngx.log(ngx.ERR, "failed to send conn data to mbbsd: ", err)
-    --    return ngx.exit(555)
-    -- end
+    if with_conn_data then
+        local _, err = mbbsd:send(build_conn_data())
+        if err then
+           ngx.log(ngx.ERR, "failed to send conn data to mbbsd: ", err)
+           return ngx.exit(555)
+        end
+    end
 
     return mbbsd
 end

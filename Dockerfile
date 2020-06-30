@@ -1,18 +1,16 @@
-FROM debian:stretch-slim
+FROM debian:buster-slim
 
-ENV	OPENRESTY_VERSION=1.13.6.1 \
-	BUILD_DEPS="libreadline6-dev libncurses5-dev libpcre3-dev libssl1.0-dev zlib1g-dev make build-essential wget git" \
-	WSPROXY_ADDR="172.17.0.1:23"
+ENV	OPENRESTY_VERSION=1.15.8.3 \
+	BUILD_DEPS="libreadline6-dev libncurses5-dev libpcre3-dev libssl-dev zlib1g-dev make build-essential wget git" \
+	WSPROXY_ADDR="172.17.0.1:23" \
+	WSPROXY_CONN_DATA=""
 
-RUN	apt-get update && apt-get dist-upgrade -y && apt-get install -y ${BUILD_DEPS} libssl1.0.2 \
+RUN	apt-get update && apt-get dist-upgrade -y && apt-get install -y ${BUILD_DEPS} libssl1.1 \
 	&& \
 	mkdir -p /tmp/build && \
 	cd /tmp/build && \
 	wget https://openresty.org/download/openresty-${OPENRESTY_VERSION}.tar.gz && \
 	tar xfz openresty-${OPENRESTY_VERSION}.tar.gz && \
-	git clone -b ptt https://github.com/robertabcd/openresty-debian.git && \
-	cd /tmp/build/openresty-${OPENRESTY_VERSION}/bundle/ngx_lua-* && \
-	patch -p1 < /tmp/build/openresty-debian/patch/atmost.patch && \
 	cd /tmp/build/openresty-${OPENRESTY_VERSION} && \
 	./configure \
 		--with-cc-opt='-g -O2 -fstack-protector-strong -Wformat -Werror=format-security -Wdate-time -D_FORTIFY_SOURCE=2' \
