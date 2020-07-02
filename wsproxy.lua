@@ -26,20 +26,11 @@ function check_origin()
 end
 
 function build_conn_data()
-    local fmt = vstruct.compile("< u4 u4 u4 s16 u2 u2 u4")
-    local flags = 0
-    local secure = tonumber(ngx.var.bbs_secure) or 0
-    if secure == 1 then
-	flags = flags + 1 -- CONN_FLAG_SECURE
-    end
+    local fmt = vstruct.compile("< s32")
+    local remote_addr = ngx.var.http_x_real_ip or ngx.var.remote_addr
+
     return fmt:write({
-        36, -- size
-        0,  -- encoding
-        ngx.var.binary_remote_addr:len(),   -- len_ip
-        ngx.var.binary_remote_addr,         -- ip16
-        tonumber(ngx.var.remote_port) or 0, -- rport
-        tonumber(ngx.var.server_port) or 0, -- lport
-	flags,
+        remote_addr
     })
 end
 
