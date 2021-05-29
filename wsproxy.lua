@@ -42,7 +42,7 @@ function connect_mbbsd()
         return ngx.exit(555)
     end
 
-    if with_conn_data then
+    if with_conn_data == "1" then
         local _, err = mbbsd:send(build_conn_data())
         if err then
            ngx.log(ngx.ERR, "failed to send conn data to mbbsd: ", err)
