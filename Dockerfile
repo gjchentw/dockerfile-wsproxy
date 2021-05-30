@@ -1,6 +1,6 @@
 FROM debian:stretch-slim
 
-ENV	OPENRESTY_VERSION=1.19.3.1 \
+ENV	OPENRESTY_VERSION=1.15.8.3 \
 	BUILD_DEPS="libreadline6-dev libncurses5-dev libpcre3-dev libssl-dev zlib1g-dev make build-essential wget git" \
 	WSPROXY_ADDR="172.17.0.1:23" \
 	WSPROXY_CONN_DATA=""
