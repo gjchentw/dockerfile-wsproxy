@@ -15,6 +15,10 @@ local origin_whitelist = {
 function check_origin()
     local origin = ngx.req.get_headers().origin
 
+    if origin == nil then
+        ngx.log(ngx.ERR, "Origin header missing")
+        return ngx.exit(400)
+    end
     if type(origin) ~= "string" then
         ngx.log(ngx.ERR, "only single origin expected, got: ", origin)
         return ngx.exit(400)
@@ -46,6 +50,7 @@ function connect_mbbsd()
         local _, err = mbbsd:send(build_conn_data())
         if err then
            ngx.log(ngx.ERR, "failed to send conn data to mbbsd: ", err)
+           mbbsd:close()
            return ngx.exit(555)
         end
     end
@@ -71,6 +76,8 @@ function ws2sock(ws, sock)
         local data, typ, err = ws:recv_frame()
         if err or not data then
             ngx.log(ngx.ERR, "failed to receive a frame: ", err)
+            sock:close() -- Close the BBS connection
+            ws:send_close(1000, "error receiving frame") -- Close the WebSocket connection
             return ngx.exit(444)
         end
 
@@ -119,11 +126,14 @@ function sock2ws(sock, ws)
         if not data then
             ws:send_close(1000, "bbs died")
             ngx.log(ngx.ERR, "failed to recv from mbbsd: ", err)
+            sock:close() -- Close the BBS connection
             return ngx.exit(444)
         else
             bytes, err = ws:send_binary(data)
             if not bytes then
                 ngx.log(ngx.ERR, "failed to send a binary frame: ", err)
+                sock:close() -- Close the BBS connection
+                ws:send_close(1000, "error sending frame") -- Close the WebSocket connection
                 return ngx.exit(444)
             end
         end
@@ -136,5 +146,15 @@ local ws = start_websocket_server()
 local sock = connect_mbbsd()
 ngx.log(ngx.ERR, "client connect over websocket, ",
     ngx.var.server_name, ":", ngx.var.server_port, " ", ngx.var.server_protocol)
-ngx.thread.spawn(ws2sock, ws, sock)
-ngx.thread.spawn(sock2ws, sock, ws)
+
+local _, err = ngx.thread.spawn(ws2sock, ws, sock)
+if err then
+    ngx.log(ngx.ERR, "failed to spawn ws2sock thread: ", err)
+    return ngx.exit(555)
+end
+
+local _, err = ngx.thread.spawn(sock2ws, sock, ws)
+if err then
+    ngx.log(ngx.ERR, "failed to spawn sock2ws thread: ", err)
+    return ngx.exit(555)
+end
